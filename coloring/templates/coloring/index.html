@@ -38,9 +38,10 @@
 	</style>
 
 	<script type="text/javascript" canvas="canvas">
+    paper.install(window);
 		window.onload = function() {
 			var canvas = document.getElementById('myCanvas');
-
+      
 			// coloring page
 			var mandala = {
 				item: null,
@@ -54,18 +55,53 @@
 				options: [],
 				$container: $('#color-palette')
 			}
-
+       
+      
 			// your rectangle gradient interaction goes in this function
 			// you may also add code outside of the function (e.g., global variables)
 			function myGradientInteraction(){
+        var rectSize = new paper.Size(30, 80);
+        var topLeftCenter =  new Point(view.center.x - rectSize.width/2, view.center.y - rectSize.height/2);
+        var rect = new Path.Rectangle(topLeftCenter, rectSize);
+        rect.fillColor = 'red';
+        
 				var tool = new paper.Tool();
-
-				tool.onMouseDown = function (event) {
-
-				}
+        
+        /*On mouseup, set the fillColor of the rectangle to a  gradient color object as follows: 
+          stops: the last two colors selected from the color palette (cp.history)
+          origin: the mousedown point
+          destination: the mouseup point
+        */
+        
+        $('.swatch').click(function(){
+          console.log(cp.history[cp.history.length - 1]);
+          console.log(gr);
+        })    
+        
+        var gr = new Gradient([cp.history[cp.history.length - 1], cp.history[cp.history.length - 2]]);
+				var mousedown;
+        var mouseup;
+        var gradientColor = new Color(gr, mousedown, mouseup);
+        
+        tool.onMouseDown = function (event) {
+          
+          /*
+          rect.fillColor = fillColor: {
+            gradient: {
+              stops: [cp.history[cp.history.length - 1], cp.history[cp.history.length - 2]]
+              },
+              origin: topLeftCenter,
+              destination: view.center
+            }
+          }*/
+          gradientColor.origin = event.point;
+          console.log(gradientColor.origin);
+        }
 
 				tool.onMouseUp = function (event) {
-					
+					gradientColor.destination = event.point;
+          console.log(gradientColor.destination);
+          rect.fillColor = gradientColor;
 				}
 			}
 
@@ -117,7 +153,7 @@
 				paper.project.importSVG(mandala.filePath, function(item) { 
 					mandala.item = item._children["design-freepik"];
 				    paper.project.insertLayer(0,mandala.item);
-
+            
 				    if (custom) {
 				    	myCustomInteraction();	
 				    } else {
