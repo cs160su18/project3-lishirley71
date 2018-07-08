@@ -51,7 +51,7 @@
 
 			// color palette
 			var cp = {
-				history: ["#000000"], // black selected by default
+				history: ["rgb(0,0,0)"], // black selected by default
 				options: [],
 				$container: $('#color-palette')
 			}
@@ -60,50 +60,66 @@
 			// your rectangle gradient interaction goes in this function
 			// you may also add code outside of the function (e.g., global variables)
 			function myGradientInteraction(){
-        var rectSize = new paper.Size(30, 80);
+        var rectSize = new paper.Size(100, 80);
         var topLeftCenter =  new Point(view.center.x - rectSize.width/2, view.center.y - rectSize.height/2);
         var rect = new Path.Rectangle(topLeftCenter, rectSize);
         rect.fillColor = 'red';
         
 				var tool = new paper.Tool();
         
-        /*On mouseup, set the fillColor of the rectangle to a  gradient color object as follows: 
-          stops: the last two colors selected from the color palette (cp.history)
-          origin: the mousedown point
-          destination: the mouseup point
-        */
+        var recentCol, secRecentCol, stops, mousedown, mouseup, gr, gradientColor;
         
-        $('.swatch').click(function(){
-          console.log(cp.history[cp.history.length - 1]);
-          console.log(gr);
-        })    
-        
-        var gr = new Gradient([cp.history[cp.history.length - 1], cp.history[cp.history.length - 2]]);
-				var mousedown;
-        var mouseup;
-        var gradientColor = new Color(gr, mousedown, mouseup);
-        
-        tool.onMouseDown = function (event) {
+        //https://stackoverflow.com/questions/34980574/how-to-extract-color-values-from-rgb-string-in-javascript/34980657
+        function rgb(str){
+          var match = str.match(/rgba?\((\d{1,3}), ?(\d{1,3}), ?(\d{1,3})\)?(?:, ?(\d(?:\.\d?))\))?/);
+          var arrayOfRGB = [parseInt(match[1]), parseInt(match[2]), parseInt(match[3])];
+          var col = new Color(arrayOfRGB[0]/255, arrayOfRGB[1]/255, arrayOfRGB[2]/255);
+          return col
+        }
           
-          /*
-          rect.fillColor = fillColor: {
-            gradient: {
-              stops: [cp.history[cp.history.length - 1], cp.history[cp.history.length - 2]]
-              },
-              origin: topLeftCenter,
-              destination: view.center
-            }
-          }*/
+        $('.swatch').click(function(){
+          secRecentCol = cp.history[cp.history.length - 2];
+          recentCol = cp.history[cp.history.length - 1];
+          stops = [rgb(recentCol), rgb(secRecentCol)];
+          gr = new Gradient(stops);
+          gradientColor = new Color(gr, mousedown, mouseup);
+        })    
+   
+        
+        tool.onMouseDown = function (event) {        
           gradientColor.origin = event.point;
-          console.log(gradientColor.origin);
+          console.log(stops);
         }
 
 				tool.onMouseUp = function (event) {
 					gradientColor.destination = event.point;
-          console.log(gradientColor.destination);
           rect.fillColor = gradientColor;
 				}
 			}
+      
+       /*console.log(cp.history[cp.history.length - 1]);
+          console.log("gradient: " + gr);
+          console.log("rgb of most recent Color: " + rgb(recentCol));
+          console.log("history: "+ cp.history);
+          console.log("recentCol: " + recentCol);
+          console.log("secRecentCol: " + secRecentCol);  
+          console.log("stops: " + stops);*/   
+        
+       /*function rgb(obj){
+         var arr = obj.match(/^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i);
+         console.log(arr);
+         return new Color(arr[1], arr[2], arr[3]);
+       }*/
+        
+        //var recentCol = cp.history[cp.history.length - 1];
+        //var secRecentCol = cp.history[cp.history.length - 2];
+        //var stops = [rgb(recentCol), rgb(secRecentCol)];
+        //lvagr = new Gradient([rgb(cp.history[cp.history.length - 1]), rgb(cp.history[cp.history.length - 2])])gr = new Gradient(;
+        
+        /*var mousedown;
+        var mouseup;
+        var gr = new Gradient(stops);
+        var gradientColor = new Color(gr, mousedown, mouseup);*/
 
 			// your custom interaction goes here!
 			// you may replace everything
