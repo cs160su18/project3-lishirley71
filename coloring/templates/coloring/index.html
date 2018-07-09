@@ -49,6 +49,26 @@
     .addBorder{
       border: 1px solid red;
     }
+    
+    .hintBtn{
+      position: absolute;
+      width: 120px;
+      height: 20px;
+      right: 50px;
+      bottom: 100px;
+      background-color: black;
+      color: white;
+      text-align: center; 
+    }
+    
+    .hintImg{
+      position: absolute;
+      width: 220px;
+      right: 50px;
+      bottom: 130px;
+      display: none;
+    }
+    
 	</style>
 
 	<script type="text/javascript" canvas="canvas">
@@ -62,6 +82,57 @@
 				lastClicked: null,
 				filePath: '/static/coloring/images/mandala-freepik.svg'
 			};
+      
+      var fishBody1 = {
+				item: null,
+				lastClicked: null,
+				filePath: '/static/coloring/images/fish-body1.svg'
+			};
+      
+      var fishBody2 = {
+				item: null,
+				lastClicked: null,
+				filePath: '/static/coloring/images/fish-body2.svg'
+			};
+      var fishBody3 = {
+				item: null,
+				lastClicked: null,
+				filePath: '/static/coloring/images/fish-body3.svg'
+			};
+      var fishBody4 = {
+				item: null,
+				lastClicked: null,
+				filePath: '/static/coloring/images/fish-body4.svg'
+			};
+      var fishBody5 = {
+				item: null,
+				lastClicked: null,
+				filePath: '/static/coloring/images/fish-body5.svg'
+			};
+      var fishBody6 = {
+				item: null,
+				lastClicked: null,
+				filePath: '/static/coloring/images/fish-body6.svg'
+			};
+      
+      var fishEye = {
+				item: null,
+				lastClicked: null,
+				filePath: '/static/coloring/images/fish-eye.svg'
+			};
+      
+      var fishHead = {
+				item: null,
+				lastClicked: null,
+				filePath: '/static/coloring/images/fish-head.svg'
+			};
+      
+      var fishTail = {
+				item: null,
+				lastClicked: null,
+				filePath: '/static/coloring/images/fish-tail.svg'
+			};
+      
 
 			// color palette
 			var cp = {
@@ -108,58 +179,47 @@
 					gradientColor.destination = event.point;
           rect.fillColor = gradientColor;
 				}
+        
+        $('.hintBtn').hide();
+        $('.hintImg').hide();
 			}
-      
-       /*console.log(cp.history[cp.history.length - 1]);
-          console.log("gradient: " + gr);
-          console.log("rgb of most recent Color: " + rgb(recentCol));
-          console.log("history: "+ cp.history);
-          console.log("recentCol: " + recentCol);
-          console.log("secRecentCol: " + secRecentCol);  
-          console.log("stops: " + stops);*/   
-        
-       /*function rgb(obj){
-         var arr = obj.match(/^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i);
-         console.log(arr);
-         return new Color(arr[1], arr[2], arr[3]);
-       }*/
-        
-        //var recentCol = cp.history[cp.history.length - 1];
-        //var secRecentCol = cp.history[cp.history.length - 2];
-        //var stops = [rgb(recentCol), rgb(secRecentCol)];
-        //lvagr = new Gradient([rgb(cp.history[cp.history.length - 1]), rgb(cp.history[cp.history.length - 2])])gr = new Gradient(;
-        
-        /*var mousedown;
-        var mouseup;
-        var gr = new Gradient(stops);
-        var gradientColor = new Color(gr, mousedown, mouseup);*/
 
 			// your custom interaction goes here!
 			// you may replace everything
 			function myCustomInteraction() {
-				var tool = new paper.Tool();
-
-				tool.onMouseDown = function (event) {
-				    var hit = mandala.item.hitTest(event.point, { tolerance: 10, fill: true });
+        
+        importFish();
+        
+       fishBody1.item.onMouseDrag = function(event){
+         fishBody1.item.position= event.point;
+       }
+       
+      
+       
+				fishBody1.item.onDoubleClick = function (event) {
+				    var hit = fishBody1.item.hitTest(event.point, { tolerance: 10, fill: true });
+            console.log(hit);
 				    if (hit) {
 				        hit.item.fillColor = cp.history[cp.history.length - 1];
 				    }
+  
         }
                 
-        /*Minor raster issues: resize is not consistent when refreshing page, exiting takes multiple clicks sometimes*/
         var url = 'http://i125.photobucket.com/albums/p76/hecartha/Color%20and%20Calibration/Hue_Value_Gradient-ACDSee_Pro_4.png';
         var raster = new Raster({
           crossOrigin: 'anonymous',
           source: url});
-        raster.size = new Size(130, 100);
-        console.log(raster.size);
-        raster.position.x += 260;
-        raster.visible = false;
+        raster.on('load', function () {
+          raster.size = new Size(180, 150);
+        });
+        raster.position.x += 160;
+          raster.visible = false;
+       
         
         var recentColorRGB;
         var lastLastSwatch;
         var lastSwatch;
-        var lastSwatchRGB;
+        var mousedDown = false; 
 
         $('.swatch').click(function(){
           if (lastSwatch) {
@@ -184,7 +244,267 @@
             var rgbString = 'rgb(' + newColor.red*255 + ', ' + newColor.green*255 + ', ' + newColor.blue*255 + ')';
             lastSwatch.css('background-color', rgbString);
             cp.history.push(rgbString);
-            /*verbose version lol
+            mousedDown = true; 
+        }
+
+        raster.onMouseMove = function (event) {
+          var previewColor = raster.getAverageColor(event.point);
+          console.log(previewColor);
+          var rgbString = 'rgb(' + previewColor.red*255 + ', ' + previewColor.green*255 + ', ' + previewColor.blue*255 + ')';
+          lastSwatch.css('background-color', rgbString);
+        }
+        
+        raster.onMouseLeave = function (event) {
+          if (recentColorRGB && !mousedDown) {
+            lastSwatch.css('background-color', recentColorRGB);
+          }
+        }     
+      
+      var $button = $('<div>').addClass('hintBtn').text('Handy Hint!');
+      var $hintImage = $('<img class="hintImg">');
+      $hintImage.attr('src', '/static/coloring/images/fish-outline.png');
+      $('body').append($button);
+      $('body').append($hintImage);
+      
+      $button.click(function () {
+         $hintImage.toggle();
+         if ($hintImage.css('display') === 'block') {
+           $button.text('close');
+         } else {
+           $button.text('Handy Hint!');
+         }
+      });
+      
+      }
+      
+      function importFish() {
+        paper.project.importSVG(fishBody2.filePath, function(item) { 
+              fishBody2.item = item._children["design-freepik"];
+				      paper.project.insertLayer(0,fishBody2.item);
+          
+              fishBody2.item.onMouseDrag = function(event){
+                fishBody2.item.position= event.point;
+              }
+              
+              fishBody2.item.onDoubleClick = function (event) {
+				        var hit = fishBody2.item.hitTest(event.point, { tolerance: 10, fill: true });
+                console.log(hit);
+                if (hit) {
+                    hit.item.fillColor = cp.history[cp.history.length - 1];
+                }
+              }
+             });
+        
+        paper.project.importSVG(fishBody3.filePath, function(item) { 
+              fishBody3.item = item._children["design-freepik"];
+				      paper.project.insertLayer(0,fishBody3.item);
+              fishBody3.item.onMouseDrag = function(event){
+                fishBody3.item.position= event.point;
+              }
+              
+              fishBody3.item.onDoubleClick = function (event) {
+				        var hit = fishBody3.item.hitTest(event.point, { tolerance: 10, fill: true });
+                console.log(hit);
+                if (hit) {
+                    hit.item.fillColor = cp.history[cp.history.length - 1];
+                }
+              }
+             });
+        
+        paper.project.importSVG(fishBody4.filePath, function(item) { 
+              fishBody4.item = item._children["design-freepik"];
+				      paper.project.insertLayer(0,fishBody4.item);
+              fishBody4.item.onMouseDrag = function(event){
+                fishBody4.item.position= event.point;
+              }
+              
+              fishBody4.item.onDoubleClick = function (event) {
+				        var hit = fishBody4.item.hitTest(event.point, { tolerance: 10, fill: true });
+                console.log(hit);
+                if (hit) {
+                    hit.item.fillColor = cp.history[cp.history.length - 1];
+                }
+              }
+             });
+        
+        paper.project.importSVG(fishBody5.filePath, function(item) { 
+              fishBody5.item = item._children["design-freepik"];
+				      paper.project.insertLayer(0,fishBody5.item);
+              fishBody5.item.onMouseDrag = function(event){
+                fishBody5.item.position= event.point;
+              }
+              
+              fishBody5.item.onDoubleClick = function (event) {
+				        var hit = fishBody5.item.hitTest(event.point, { tolerance: 10, fill: true });
+                console.log(hit);
+                if (hit) {
+                    hit.item.fillColor = cp.history[cp.history.length - 1];
+                }
+              }
+             });
+        
+        paper.project.importSVG(fishBody6.filePath, function(item) { 
+              fishBody6.item = item._children["design-freepik"];
+				      paper.project.insertLayer(0,fishBody6.item);
+              fishBody6.item.onMouseDrag = function(event){
+                fishBody6.item.position= event.point;
+              }
+              
+              fishBody6.item.onDoubleClick = function (event) {
+				        var hit = fishBody6.item.hitTest(event.point, { tolerance: 10, fill: true });
+                console.log(hit);
+                if (hit) {
+                    hit.item.fillColor = cp.history[cp.history.length - 1];
+                }
+              }
+              
+              fishBody6.item.position = new Point(200, 150);
+             });
+        
+        paper.project.importSVG(fishHead.filePath, function(item) { 
+              fishHead.item = item._children["design-freepik"];
+				      paper.project.insertLayer(0,fishHead.item);
+              fishHead.item.onMouseDrag = function(event){
+                fishHead.item.position= event.point;
+              }
+              
+              fishHead.item.onDoubleClick = function (event) {
+				        var hit = fishHead.item.hitTest(event.point, { tolerance: 10, fill: true });
+                console.log(hit);
+                if (hit) {
+                    hit.item.fillColor = cp.history[cp.history.length - 1];
+                }
+              }
+              
+              fishHead.item.position = new Point(60, 300);
+             });
+        
+        paper.project.importSVG(fishTail.filePath, function(item) { 
+              fishTail.item = item._children["design-freepik"];
+				      paper.project.insertLayer(0,fishTail.item);
+              fishTail.item.onMouseDrag = function(event){
+                fishTail.item.position= event.point;
+              }
+              
+              fishTail.item.onDoubleClick = function (event) {
+				        var hit = fishTail.item.hitTest(event.point, { tolerance: 10, fill: true });
+                console.log(hit);
+                if (hit) {
+                    hit.item.fillColor = cp.history[cp.history.length - 1];
+                }
+              }
+              fishTail.item.position.x -= 40;
+             });
+        
+        paper.project.importSVG(fishEye.filePath, function(item) { 
+              fishEye.item = item._children["design-freepik"];
+				      paper.project.insertLayer(0,fishEye.item);
+              
+              fishEye.item.onMouseDrag = function(event){
+                fishEye.item.position= event.point;
+              }
+              
+              fishEye.item.onDoubleClick = function (event) {
+				        var hit = fishEye.item.hitTest(event.point, { tolerance: 10, fill: true });
+                console.log(hit);
+                if (hit) {
+                    hit.item.fillColor = cp.history[cp.history.length - 1];
+                }
+              }
+              
+              fishEye.item.position = view.center;
+              
+             });
+      }
+      
+      
+
+			// create a color palette with the given colors
+			function createColorPalette(colors){
+
+				// create a swatch for each color
+				for (var i = colors.length - 1; i >= 0; i--) {
+					var $swatch = $("<div>").css("background-color", colors[i])
+									   .addClass("swatch");
+         
+					$swatch.click(function(){
+						// add color to the color palette history
+					  	cp.history.push($(this).css("background-color"));
+					});
+					cp.$container.append($swatch);
+				}
+			}
+
+			// loads a set of colors from a json to create a color palette
+			function getColorsCreatePalette(){
+				cp.$container.html(" ");
+				$.getJSON('/static/coloring/vendors/material/material-colors.json', function(colors){
+					var keys = Object.keys(colors);
+					for (var i = keys.length - 1; i >= 0; i--) {
+						cp.options.push(colors[keys[i]][500]);
+					}
+					createColorPalette(cp.options);
+				});
+			}
+
+			function init(custom){
+				paper.setup(canvas);
+				getColorsCreatePalette();				
+            
+				    if (custom) {
+             paper.project.importSVG(fishBody1.filePath, function(item) { 
+              fishBody1.item = item._children["design-freepik"];
+				      paper.project.insertLayer(0,fishBody1.item);
+				    	myCustomInteraction();
+             });	
+				    } else {
+              paper.project.importSVG(mandala.filePath, function(item) { 
+				    	  mandala.item = item._children["design-freepik"];
+				        paper.project.insertLayer(0,mandala.item);
+                myGradientInteraction();
+              });
+            }	    		
+			}
+
+			// To see your myGradientInteraction version visit: 
+			// http://<your url>:8000/coloring/?type=gradient
+			// To see your myCustomInteraction version visit: 
+			// http://<your url>:8000/coloring/
+			var url = window.location.href;
+			if (url.indexOf("gradient") > -1) {
+				init(false);
+			} else {
+				init(true);
+			}
+    }
+    
+    /*Part 1
+          console.log(cp.history[cp.history.length - 1]);
+          console.log("gradient: " + gr);
+          console.log("rgb of most recent Color: " + rgb(recentCol));
+          console.log("history: "+ cp.history);
+          console.log("recentCol: " + recentCol);
+          console.log("secRecentCol: " + secRecentCol);  
+          console.log("stops: " + stops);*/   
+        
+       /*function rgb(obj){
+         var arr = obj.match(/^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i);
+         console.log(arr);
+         return new Color(arr[1], arr[2], arr[3]);
+       }*/
+        
+        //var recentCol = cp.history[cp.history.length - 1];
+        //var secRecentCol = cp.history[cp.history.length - 2];
+        //var stops = [rgb(recentCol), rgb(secRecentCol)];
+        //lvagr = new Gradient([rgb(cp.history[cp.history.length - 1]), rgb(cp.history[cp.history.length - 2])])gr = new Gradient(;
+        
+        /*var mousedown;
+        var mouseup;
+        var gr = new Gradient(stops);
+        var gradientColor = new Color(gr, mousedown, mouseup);*/
+    
+    /*Part 2 
+          verbose version lol
               cp.$container.children().each(function (index, swatch) {
               var swatchRGB = $(swatch).css('background-color');
               if (recentColorRGB === swatchRGB) {
@@ -193,23 +513,6 @@
                 return false;
               }
             });*/
-        }
-        
-        //issue: doesn't work cry 
-        raster.onMouseMove = function (event) {
-          var previewColor = raster.getAverageColor(event.point);
-          console.log(previewColor);
-          var rgbString = 'rgb(' + previewColor.red*255 + ', ' + previewColor.green*255 + ', ' + previewColor.blue*255 + ')';
-          lastSwatchRGB = lastSwatch.css('background-color');
-          lastSwatch.css('background-color', rgbString);
-        }
-        
-        raster.onMouseLeave = function (event) {
-          if (lastSwatchRGB) {
-            lastSwatch.css('background-color', lastSwatchRGB);
-          }
-        }
-
         
         /*var $image = $('<img id="gradient">').addClass('colorGr');
         $image.attr('src', url);
@@ -244,69 +547,10 @@
         });*/
 
         //$('.colorGr').
-      }
-
-			// create a color palette with the given colors
-			function createColorPalette(colors){
-
-				// create a swatch for each color
-				for (var i = colors.length - 1; i >= 0; i--) {
-					var $swatch = $("<div>").css("background-color", colors[i])
-									   .addClass("swatch");
-         
-					$swatch.click(function(){
-						// add color to the color palette history
-					  	cp.history.push($(this).css("background-color"));
-					});
-					cp.$container.append($swatch);
-				}
-			}
-
-			// loads a set of colors from a json to create a color palette
-			function getColorsCreatePalette(){
-				cp.$container.html(" ");
-				$.getJSON('/static/coloring/vendors/material/material-colors.json', function(colors){
-					var keys = Object.keys(colors);
-					for (var i = keys.length - 1; i >= 0; i--) {
-						cp.options.push(colors[keys[i]][500]);
-					}
-					createColorPalette(cp.options);
-				});
-			}
-
-			function init(custom){
-				paper.setup(canvas);
-				getColorsCreatePalette();
-      
-
-				paper.project.importSVG(mandala.filePath, function(item) { 
-					mandala.item = item._children["design-freepik"];
-				    paper.project.insertLayer(0,mandala.item);
-            
-				    if (custom) {
-				    	myCustomInteraction();	
-				    } else {
-				    	myGradientInteraction();
-				    }		
-					
-				});
-			}
-
-			// To see your myGradientInteraction version visit: 
-			// http://<your url>:8000/coloring/?type=gradient
-			// To see your myCustomInteraction version visit: 
-			// http://<your url>:8000/coloring/
-			var url = window.location.href;
-			if (url.indexOf("gradient") > -1) {
-				init(false);
-			} else {
-				init(true);
-			}
-    }
 	</script>
 </head>
 <body>	
-
+  
 	<canvas id="myCanvas" width="750px" height="750px"></canvas>
 	<div id="color-palette"></div>
   
