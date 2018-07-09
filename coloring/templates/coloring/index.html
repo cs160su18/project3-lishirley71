@@ -11,7 +11,7 @@
 
 	<style type="text/css">
 		#color-palette {
-			width: 300px;
+			width: 310px;
 			background-color: #f1f1f1;
 			display: flex;
 			flex-wrap: wrap;
@@ -35,6 +35,20 @@
 		    margin-right: auto;
 		    display: block;
 		}
+    
+    .colorGr{
+      width: 100px;
+      height: 70px;
+      position: absolute;
+      left: 310px;
+      /*background-image: url('http://i125.photobucket.com/albums/p76/hecartha/Color%20and%20Calibration/Hue-Value-Gradient.png');*/
+      background-size:contain;
+      display: none;
+    }
+    
+    .addBorder{
+      border: 1px solid red;
+    }
 	</style>
 
 	<script type="text/javascript" canvas="canvas">
@@ -47,7 +61,7 @@
 				item: null,
 				lastClicked: null,
 				filePath: '/static/coloring/images/mandala-freepik.svg'
-			};	
+			};
 
 			// color palette
 			var cp = {
@@ -83,12 +97,11 @@
           stops = [rgb(recentCol), rgb(secRecentCol)];
           gr = new Gradient(stops);
           gradientColor = new Color(gr, mousedown, mouseup);
-        })    
+        });    
    
         
         tool.onMouseDown = function (event) {        
           gradientColor.origin = event.point;
-          console.log(stops);
         }
 
 				tool.onMouseUp = function (event) {
@@ -131,9 +144,107 @@
 				    if (hit) {
 				        hit.item.fillColor = cp.history[cp.history.length - 1];
 				    }
-				}
-			}
+        }
+                
+        /*Minor raster issues: resize is not consistent when refreshing page, exiting takes multiple clicks sometimes*/
+        var url = 'http://i125.photobucket.com/albums/p76/hecartha/Color%20and%20Calibration/Hue_Value_Gradient-ACDSee_Pro_4.png';
+        var raster = new Raster({
+          crossOrigin: 'anonymous',
+          source: url});
+        raster.size = new Size(130, 100);
+        console.log(raster.size);
+        raster.position.x += 260;
+        raster.visible = false;
+        
+        var recentColorRGB;
+        var lastLastSwatch;
+        var lastSwatch;
+        var lastSwatchRGB;
 
+        $('.swatch').click(function(){
+          if (lastSwatch) {
+            lastlastSwatch = lastSwatch;
+            lastlastSwatch.removeClass('addBorder');
+          }
+          lastSwatch = $(this);
+          recentColorRGB = cp.history[cp.history.length - 1];  
+          raster.visible = true;
+          lastSwatch.addClass('addBorder');
+        })
+        
+        //http://www.antimath.info/jquery/hide-popup-when-clicking-outside/
+        $(document).on('click', function(event) {
+          if (!$(event.target).parents().addBack().is('.swatch')) {
+            raster.visible = false;
+          }
+        });
+        
+        raster.onMouseDown = function(event) {
+            var newColor = raster.getAverageColor(event.point);
+            var rgbString = 'rgb(' + newColor.red*255 + ', ' + newColor.green*255 + ', ' + newColor.blue*255 + ')';
+            lastSwatch.css('background-color', rgbString);
+            cp.history.push(rgbString);
+            /*verbose version lol
+              cp.$container.children().each(function (index, swatch) {
+              var swatchRGB = $(swatch).css('background-color');
+              if (recentColorRGB === swatchRGB) {
+                $(swatch).css('background-color', rgbString);
+                cp.history.push(rgbString);
+                return false;
+              }
+            });*/
+        }
+        
+        //issue: doesn't work cry 
+        raster.onMouseMove = function (event) {
+          var previewColor = raster.getAverageColor(event.point);
+          console.log(previewColor);
+          var rgbString = 'rgb(' + previewColor.red*255 + ', ' + previewColor.green*255 + ', ' + previewColor.blue*255 + ')';
+          lastSwatchRGB = lastSwatch.css('background-color');
+          lastSwatch.css('background-color', rgbString);
+        }
+        
+        raster.onMouseLeave = function (event) {
+          if (lastSwatchRGB) {
+            lastSwatch.css('background-color', lastSwatchRGB);
+          }
+        }
+
+        
+        /*var $image = $('<img id="gradient">').addClass('colorGr');
+        $image.attr('src', url);
+        cp.$container.append($image);
+        
+        $('.swatch').click(function(){
+          console.log('swatch clicked ' + cp.history[cp.history.length - 1]);
+          $image.show();
+        })
+        
+        //http://www.antimath.info/jquery/hide-popup-when-clicking-outside/
+        $(document).on('click', function(event) {
+          if (!$(event.target).parents().addBack().is('.swatch')) {
+            $image.hide();
+          }
+        });*/
+        
+        /*var $colorGr = $("<div>").css("background-color", "black").addClass("colorGr");
+        cp.$container.append($colorGr);
+				
+        $('.swatch').click(function(){
+          console.log('swatch clicked ' + cp.history[cp.history.length - 1]);
+          $colorGr.show();
+        })
+        
+        //http://www.antimath.info/jquery/hide-popup-when-clicking-outside/
+        $(document).on('click', function(event) {
+          console.log(!$(event.target).parents().addBack().is($colorGr));
+          if (!$(event.target).parents().addBack().is('.swatch')) {
+            $($colorGr).hide();
+          }
+        });*/
+
+        //$('.colorGr').
+      }
 
 			// create a color palette with the given colors
 			function createColorPalette(colors){
@@ -142,6 +253,7 @@
 				for (var i = colors.length - 1; i >= 0; i--) {
 					var $swatch = $("<div>").css("background-color", colors[i])
 									   .addClass("swatch");
+         
 					$swatch.click(function(){
 						// add color to the color palette history
 					  	cp.history.push($(this).css("background-color"));
@@ -165,6 +277,7 @@
 			function init(custom){
 				paper.setup(canvas);
 				getColorsCreatePalette();
+      
 
 				paper.project.importSVG(mandala.filePath, function(item) { 
 					mandala.item = item._children["design-freepik"];
@@ -176,7 +289,7 @@
 				    	myGradientInteraction();
 				    }		
 					
-				}); 
+				});
 			}
 
 			// To see your myGradientInteraction version visit: 
@@ -189,12 +302,14 @@
 			} else {
 				init(true);
 			}
-		}
+    }
 	</script>
 </head>
 <body>	
 
 	<canvas id="myCanvas" width="750px" height="750px"></canvas>
 	<div id="color-palette"></div>
+  
+    
 </body>
 </html>
